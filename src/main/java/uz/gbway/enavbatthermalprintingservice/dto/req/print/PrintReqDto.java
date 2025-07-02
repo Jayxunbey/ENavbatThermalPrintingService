@@ -1,6 +1,9 @@
-package uz.gbway.enavbatthermalprintingservice.dto;
+package uz.gbway.enavbatthermalprintingservice.dto.req.print;
 
-public class CheckRequest {
+import lombok.Getter;
+
+@Getter
+public class PrintReqDto {
     private String product;
     private String price;
 
