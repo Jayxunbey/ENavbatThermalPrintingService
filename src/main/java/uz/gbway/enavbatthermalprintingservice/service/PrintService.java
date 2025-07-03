@@ -3,6 +3,7 @@ package uz.gbway.enavbatthermalprintingservice.service;
 import org.springframework.stereotype.Service;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
+import uz.gbway.enavbatthermalprintingservice.util.TimeUtil;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -18,9 +19,11 @@ import java.util.List;
 @Service
 public class PrintService {
     private final QrCodeUtil qrCodeUtil;
+    private final TimeUtil timeUtil;
 
-    public PrintService(QrCodeUtil qrCodeUtil) {
+    public PrintService(QrCodeUtil qrCodeUtil, TimeUtil timeUtil) {
         this.qrCodeUtil = qrCodeUtil;
+        this.timeUtil = timeUtil;
     }
 
     public int print(PrintReqDto req) {
@@ -33,7 +36,7 @@ public class PrintService {
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 500; // long enough for a receipt
+            double height = 450; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
@@ -98,7 +101,7 @@ public class PrintService {
             drawCenteredText(
                     grPage,
                     req.getQrNumber(),
-                    "Monospaced",
+                    "Arial Unicode MS",
                     22,
                     y+=50,
                     pageWidth);
@@ -135,11 +138,22 @@ public class PrintService {
                         comment,
                         "Calibri Light",
                         11,
-                        y+=8,
-                        pageWidth);
+                        y+=6,
+                        pageWidth,
+                        15);
 
             }
 
+
+// created time info
+
+            drawCenteredText(
+                    grPage,
+                    timeUtil.epochToRegex("dd-MM-yyyy  HH:mm", req.getDate()),
+                    "Calibri Light",
+                    12,
+                    y+=15,
+                    pageWidth);
 
             ////////////////////////////////////////////////////////////////////////////////
 
@@ -151,12 +165,12 @@ public class PrintService {
         job.setPageable(book);
     }
 
-    public int drawCenteredAndLineBreakerText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth) {
+    public int drawCenteredAndLineBreakerText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth, float margin) {
 
         Font font = new Font(fontName, Font.PLAIN, fontSize);
         g2d.setFont(font);
 
-        return writeAsLineBreaking(g2d, text, y, pageWidth, font);
+        return writeAsLineBreaking(g2d, text, y, pageWidth, font,margin);
 
 //        FontMetrics metrics = g2d.getFontMetrics(font);
 //        int textWidth = metrics.stringWidth(text);
@@ -166,7 +180,9 @@ public class PrintService {
 
     }
 
-    private int writeAsLineBreaking(Graphics2D g2d, String text, int y, int pageWidth, Font font) {
+    private int writeAsLineBreaking(Graphics2D g2d, String text, int y, int pageWidth, Font font, float margin) {
+
+
 
         FontRenderContext frc = g2d.getFontRenderContext();
         AttributedString attrStr = new AttributedString(text);
@@ -175,12 +191,12 @@ public class PrintService {
         AttributedCharacterIterator paragraph = attrStr.getIterator();
         LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, frc);
 
-        float wrappingWidth = (float) (pageWidth - 30); // 15px margin each side
+        float wrappingWidth = (float) (pageWidth - margin*2); // 15px margin each side
 
         while (lineMeasurer.getPosition() < paragraph.getEndIndex()) {
             TextLayout layout = lineMeasurer.nextLayout(wrappingWidth);
             y += layout.getAscent();
-            float drawPosX = (float)(pageWidth - layout.getAdvance()) / 2;
+            float drawPosX = (float)(pageWidth - layout.getAdvance()) / 2+margin/2;
             layout.draw(g2d, drawPosX, y);
             y += layout.getDescent() + layout.getLeading();
         }
@@ -246,7 +262,7 @@ public class PrintService {
             drawCenteredText(
                     grPage,
                     req.getQrNumber(),
-                    "Monospaced",
+                    "Bahnschrift Light",
                     22,
                     y+=50,
                     pageWidth);
@@ -311,7 +327,7 @@ public class PrintService {
 
     public void drawCenteredText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth) {
 
-        Font font = new Font(fontName, Font.PLAIN, fontSize);
+        Font font = new Font(fontName, Font.CENTER_BASELINE, fontSize);
         g2d.setFont(font);
 
         FontMetrics metrics = g2d.getFontMetrics(font);
