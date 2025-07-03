@@ -10,7 +10,7 @@
     </parent>
     <groupId>uz.gbway</groupId>
     <artifactId>ENavbatThermalPrintingService</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>v1</version>
     <name>ENavbatThermalPrintingService</name>
     <description>ENavbatThermalPrintingService</description>
     <url/>
