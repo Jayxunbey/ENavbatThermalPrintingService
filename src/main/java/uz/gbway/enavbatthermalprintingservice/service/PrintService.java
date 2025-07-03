@@ -5,8 +5,14 @@ import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
 
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
 import java.util.List;
 
 @Service
@@ -27,7 +33,7 @@ public class PrintService {
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 400; // long enough for a receipt
+            double height = 500; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
@@ -94,13 +100,13 @@ public class PrintService {
                     req.getQrNumber(),
                     "Monospaced",
                     22,
-                    y+=60,
+                    y+=50,
                     pageWidth);
 
 
 // qr code info
 
-            drawCenteredImage(grPage, qrBufferedImage, y+=5, pageWidth);
+            drawCenteredImage(grPage, qrBufferedImage, y+=4, pageWidth);
 
             y += qrBufferedImage.getHeight();
 
@@ -109,12 +115,12 @@ public class PrintService {
             drawCenteredText(
                     grPage,
                     req.getPlateNumber(),
-                    "Bahnschrift SemiLight",
-                    18,
-                    y+=20,
+                    "Arial Unicode MS",
+                    15,
+                    y+=25,
                     pageWidth);
 
-            y+=30;
+            y+=10;
 
 // comments info
 
@@ -124,12 +130,12 @@ public class PrintService {
 
             for (String comment : comments) {
 
-                drawCenteredText(
+                y = drawCenteredAndLineBreakerText(
                         grPage,
                         comment,
-                        "Bahnschrift SemiLight",
-                        15,
-                        y+=10,
+                        "Calibri Light",
+                        11,
+                        y+=8,
                         pageWidth);
 
             }
@@ -143,6 +149,44 @@ public class PrintService {
         }, format);
 
         job.setPageable(book);
+    }
+
+    public int drawCenteredAndLineBreakerText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth) {
+
+        Font font = new Font(fontName, Font.PLAIN, fontSize);
+        g2d.setFont(font);
+
+        return writeAsLineBreaking(g2d, text, y, pageWidth, font);
+
+//        FontMetrics metrics = g2d.getFontMetrics(font);
+//        int textWidth = metrics.stringWidth(text);
+//
+//        int x = Math.max((pageWidth - textWidth) / 2, 0);
+//        g2d.drawString(text, x, y);
+
+    }
+
+    private int writeAsLineBreaking(Graphics2D g2d, String text, int y, int pageWidth, Font font) {
+
+        FontRenderContext frc = g2d.getFontRenderContext();
+        AttributedString attrStr = new AttributedString(text);
+        attrStr.addAttribute(TextAttribute.FONT, font);
+
+        AttributedCharacterIterator paragraph = attrStr.getIterator();
+        LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, frc);
+
+        float wrappingWidth = (float) (pageWidth - 30); // 15px margin each side
+
+        while (lineMeasurer.getPosition() < paragraph.getEndIndex()) {
+            TextLayout layout = lineMeasurer.nextLayout(wrappingWidth);
+            y += layout.getAscent();
+            float drawPosX = (float)(pageWidth - layout.getAdvance()) / 2;
+            layout.draw(g2d, drawPosX, y);
+            y += layout.getDescent() + layout.getLeading();
+        }
+
+        return y;
+
     }
 
     private void qrCodeInfoENavbat(PrinterJob job, PageFormat format, PrintReqDto req) {
