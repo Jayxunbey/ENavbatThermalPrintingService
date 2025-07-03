@@ -7,7 +7,6 @@ import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,8 +27,10 @@ public class PrintService {
 
 
             Paper paper = new Paper();
-            double width = 227; // 80mm in points
-            double height = 800; // long enough for a receipt
+
+            double width = 210; // 80mm in points
+            double height = 1000; // long enough for a receipt
+
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
 
@@ -53,7 +54,7 @@ public class PrintService {
 
         BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 150, 150);
 
-        int pageWidth = getPageWidth(80, 203.0);
+        final int pageWidth = 210; //getPageWidth(80, 203.0);
 
         job.setPrintable((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
@@ -65,29 +66,45 @@ public class PrintService {
             grPage.rotate(Math.toRadians(0), pageFormat.getImageableWidth(), pageFormat.getImageableHeight());
 
 
-            int y = 10;
+            int y = 30;
 
 // center test info
 
-//            drawCenteredText(grPage, "Centered", "Monospaced",20, y, pageWidth);
+            drawCenteredText(
+                    grPage,
+                    "Centered",
+                    "Monospaced",
+                    20,
+                    y+=15,
+                    pageWidth);
+
+
+            y+=20;
 
 
 
 // post malumot
-            grPage.setFont(new Font("Monospaced", Font.PLAIN, 10));
-            String postNameBlock = "\"" + req.getPostName() + "\"";
 
-            grPage.drawString(postNameBlock, 50, y);
-            y += 15;
-            grPage.drawString("чегара пости", 50, y);
-            y += 15;
+            drawCenteredText(
+                    grPage,
+                    "\"" + req.getPostName() + "\"",
+                    "Monospaced",
+                    15,
+                    y+=30,
+                    pageWidth);
 
+            drawCenteredText(
+                    grPage,
+                    "чегара пости",
+                    "Monospaced",
+                    15,
+                    y+=10,
+                    pageWidth);
 
-            y += 10;
 
 // qr number info
             grPage.setFont(new Font("Monospaced", Font.PLAIN, 20));
-            grPage.drawString(req.getQrNumber(), 10, y);
+            grPage.drawString(req.getQrNumber(), 210, y);
             y += 15;
 
 // qr code info
@@ -99,7 +116,7 @@ public class PrintService {
 // plate number info
             grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
 
-            grPage.drawString(req.getPlateNumber(), 10, y);
+            grPage.drawString(req.getPlateNumber(), 211, y);
             y += 15;
 
 // comments info
