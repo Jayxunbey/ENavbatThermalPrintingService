@@ -24,12 +24,10 @@ public class PrintService {
             PrinterJob job = PrinterJob.getPrinterJob();
 
 
-
-
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 1000; // long enough for a receipt
+            double height = 400; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
@@ -38,7 +36,8 @@ public class PrintService {
             format.setPaper(paper);
             format.setOrientation(PageFormat.PORTRAIT);
 
-            qrCodeInfoENavbat(job, format, req);
+
+            qrCodeInfoENavbatVBook(job, format, req);
 
             job.print(); // avtomatik chiqarish
 
@@ -48,6 +47,92 @@ public class PrintService {
 
 
         return 200;
+    }
+
+    private void qrCodeInfoENavbatVBook(PrinterJob job, PageFormat format, PrintReqDto req) {
+        Book book = new Book();
+
+        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 210, 210);
+
+        final int pageWidth = 210; //getPageWidth(80, 203.0);
+
+        book.append((graphics, pageFormat, pageIndex) -> {
+            if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
+
+            Graphics2D grPage = (Graphics2D) graphics;
+
+            // 180 daraja aylantirish (teskari chiqayotgan bo‘lsa)
+            grPage.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+            grPage.rotate(Math.toRadians(0), pageFormat.getImageableWidth(), pageFormat.getImageableHeight());
+
+
+            int y = 0;
+
+// post malumot
+
+            drawCenteredText(
+                    grPage,
+                    "\"" + req.getPostName() + "\"",
+                    "Cascadia Code",
+                    15,
+                    y+=25,
+                    pageWidth);
+
+            drawCenteredText(
+                    grPage,
+                    "чегара пости",
+                    "Cascadia Code",
+                    15,
+                    y+=12,
+                    pageWidth);
+
+
+// qr number info
+
+            drawCenteredText(
+                    grPage,
+                    req.getQrNumber(),
+                    "Cascadia Code ExtraLight",
+                    22,
+                    y+=60,
+                    pageWidth);
+
+
+// qr code info
+
+            drawCenteredImage(grPage, qrBufferedImage, y+=10, pageWidth);
+
+            y += qrBufferedImage.getHeight()+10;
+
+// plate number info
+
+            grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
+
+            grPage.drawString(req.getPlateNumber(), 211, y);
+            y += 15;
+
+// comments info
+
+            List<String> comments = req.getComments();
+
+            grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
+
+            for (String comment : comments) {
+
+                grPage.drawString(comment, 10, y);
+                y += 15;
+
+            }
+
+
+            ////////////////////////////////////////////////////////////////////////////////
+
+
+            return Printable.PAGE_EXISTS;
+
+        }, format);
+
+        job.setPageable(book);
     }
 
     private void qrCodeInfoENavbat(PrinterJob job, PageFormat format, PrintReqDto req) {
@@ -103,20 +188,30 @@ public class PrintService {
 
 
 // qr number info
-            grPage.setFont(new Font("Monospaced", Font.PLAIN, 20));
-            grPage.drawString(req.getQrNumber(), 210, y);
-            y += 15;
+
+            drawCenteredText(
+                    grPage,
+                    req.getQrNumber(),
+                    "Monospaced",
+                    22,
+                    y+=50,
+                    pageWidth);
+
 
 // qr code info
-            grPage.drawImage(qrBufferedImage, 60, y, null); // Centered
+
+            drawCenteredImage(grPage, qrBufferedImage, y+=10, pageWidth);
+
+//            grPage.drawImage(qrBufferedImage, 60, y, null); // Centered
 
 
-            y += 10;
+            y += qrBufferedImage.getHeight()+10;
 
 // plate number info
+
             grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
 
-            grPage.drawString(req.getPlateNumber(), 211, y);
+            grPage.drawString(req.getPlateNumber(), 190, y);
             y += 15;
 
 // comments info
@@ -127,7 +222,7 @@ public class PrintService {
 
             for (String comment : comments) {
 
-                grPage.drawString(comment, 10, y);
+                grPage.drawString(comment, 200, y);
                 y += 5;
 
             }
@@ -147,6 +242,18 @@ public class PrintService {
         return pageWidth;
 
     }
+
+    public void drawCenteredImage(Graphics2D g2d, Image image, int y, int pageWidth) {
+
+        int imageWidth = image.getWidth(null);
+
+        int x = Math.max((pageWidth - imageWidth) / 2, 0);
+
+        g2d.drawImage(image, x, y, null); // Centered
+
+    }
+
+
 
     public void drawCenteredText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth) {
 
