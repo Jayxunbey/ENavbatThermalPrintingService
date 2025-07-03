@@ -2,30 +2,29 @@ package uz.gbway.enavbatthermalprintingservice.service;
 
 import org.springframework.stereotype.Service;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
+import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.awt.print.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PrintService {
+    private final QrCodeUtil qrCodeUtil;
+
+    public PrintService(QrCodeUtil qrCodeUtil) {
+        this.qrCodeUtil = qrCodeUtil;
+    }
+
     public int print(PrintReqDto req) {
 
         try {
 
             PrinterJob job = PrinterJob.getPrinterJob();
 
-//            String content = """
-//                            Confirmation
-//                    ----------------------------
-//                    Post: Yallama
-//                    Queue Number: EN02072500001
-//                    FIO: Jayxunbey Muxammadov
-//                    Price: 15 000 so‘m
-//
-//
-//                        Uzbekistan - Tashkent
-//                    """;
+
 
 
             Paper paper = new Paper();
@@ -38,48 +37,112 @@ public class PrintService {
             format.setPaper(paper);
             format.setOrientation(PageFormat.PORTRAIT);
 
-
-            job.setPrintable((graphics, pageFormat, pageIndex) -> {
-                if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
-
-//                graphics.setFont(new Font("Monospaced", Font.PLAIN, 10));
-//                int y = 1;
-
-//                graphics.drawString("Chek E-Navbat", 15, y); y += 20;
-//                graphics.drawString("Maxsulot: " + req.getProduct(), 15, y); y += 20;
-//                graphics.drawString("Narx: " + req.getPrice(), 15, y); y += 20;
-//                graphics.drawString("Sana: " + LocalDateTime.now(), 15, y);
-
-                Graphics2D g2d = (Graphics2D) graphics;
-
-                // 180 daraja aylantirish (teskari chiqayotgan bo‘lsa)
-                g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-                g2d.rotate(Math.toRadians(0), pageFormat.getImageableWidth() , pageFormat.getImageableHeight() / 2);
-
-                g2d.setFont(new Font("Monospaced", Font.PLAIN, 10));
-
-                int y = 10;
-
-
-                g2d.drawString("Xorazm E-Navbat", 10, y); y += 15;
-                g2d.drawLine(0, y, 10, y); y += 15;
-                g2d.drawString("Número: L256-180310-1", -50, y); y += 15;
-                g2d.drawString("Fecha: 30 Marzo 2018 11:00", 10, y); y += 15;
-                g2d.drawString("Cliente: Test", 0, y); y += 15;
-                g2d.drawString("Total: 15 EUR", -100, y); y += 15;
-                g2d.drawString("Estado: PAGADO", 50, y); y += 15;
-
-                return Printable.PAGE_EXISTS;
-
-            },format);
+            qrCodeInfoENavbat(job, format, req);
 
             job.print(); // avtomatik chiqarish
 
-        } catch (PrinterException e) {
+        } catch (Exception e) {
             return 500;
         }
 
 
         return 200;
     }
+
+    private void qrCodeInfoENavbat(PrinterJob job, PageFormat format, PrintReqDto req) {
+
+        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 150, 150);
+
+        int pageWidth = getPageWidth(80, 203.0);
+
+        job.setPrintable((graphics, pageFormat, pageIndex) -> {
+            if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
+
+            Graphics2D grPage = (Graphics2D) graphics;
+
+            // 180 daraja aylantirish (teskari chiqayotgan bo‘lsa)
+            grPage.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+            grPage.rotate(Math.toRadians(0), pageFormat.getImageableWidth(), pageFormat.getImageableHeight());
+
+
+            int y = 10;
+
+// center test info
+
+//            drawCenteredText(grPage, "Centered", "Monospaced",20, y, pageWidth);
+
+
+
+// post malumot
+            grPage.setFont(new Font("Monospaced", Font.PLAIN, 10));
+            String postNameBlock = "\"" + req.getPostName() + "\"";
+
+            grPage.drawString(postNameBlock, 50, y);
+            y += 15;
+            grPage.drawString("чегара пости", 50, y);
+            y += 15;
+
+
+            y += 10;
+
+// qr number info
+            grPage.setFont(new Font("Monospaced", Font.PLAIN, 20));
+            grPage.drawString(req.getQrNumber(), 10, y);
+            y += 15;
+
+// qr code info
+            grPage.drawImage(qrBufferedImage, 60, y, null); // Centered
+
+
+            y += 10;
+
+// plate number info
+            grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
+
+            grPage.drawString(req.getPlateNumber(), 10, y);
+            y += 15;
+
+// comments info
+
+            List<String> comments = req.getComments();
+
+            grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
+
+            for (String comment : comments) {
+
+                grPage.drawString(comment, 10, y);
+                y += 5;
+
+            }
+
+
+            ////////////////////////////////////////////////////////////////////////////////
+
+
+            return Printable.PAGE_EXISTS;
+
+        }, format);
+    }
+
+    private int getPageWidth(int paperWidthMM, double dpi) {
+        int pageWidth = (int) (paperWidthMM * dpi / 25.4); // 80mm in pixels
+
+        return pageWidth;
+
+    }
+
+    public void drawCenteredText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth) {
+
+        Font font = new Font(fontName, Font.PLAIN, fontSize);
+        g2d.setFont(font);
+
+        FontMetrics metrics = g2d.getFontMetrics(font);
+        int textWidth = metrics.stringWidth(text);
+
+        int x = Math.max((pageWidth - textWidth) / 2, 0);
+        g2d.drawString(text, x, y);
+
+    }
+
+
 }
