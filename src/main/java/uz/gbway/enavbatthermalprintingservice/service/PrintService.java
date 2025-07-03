@@ -52,9 +52,9 @@ public class PrintService {
     private void qrCodeInfoENavbatVBook(PrinterJob job, PageFormat format, PrintReqDto req) {
         Book book = new Book();
 
-        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 210, 210);
+        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 180, 180);
 
-        final int pageWidth = 210; //getPageWidth(80, 203.0);
+        final int pageWidth = 210;
 
         book.append((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
@@ -92,7 +92,7 @@ public class PrintService {
             drawCenteredText(
                     grPage,
                     req.getQrNumber(),
-                    "Cascadia Code ExtraLight",
+                    "Monospaced",
                     22,
                     y+=60,
                     pageWidth);
@@ -100,27 +100,37 @@ public class PrintService {
 
 // qr code info
 
-            drawCenteredImage(grPage, qrBufferedImage, y+=10, pageWidth);
+            drawCenteredImage(grPage, qrBufferedImage, y+=5, pageWidth);
 
-            y += qrBufferedImage.getHeight()+10;
+            y += qrBufferedImage.getHeight();
 
 // plate number info
 
-            grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
+            drawCenteredText(
+                    grPage,
+                    req.getPlateNumber(),
+                    "Bahnschrift SemiLight",
+                    18,
+                    y+=20,
+                    pageWidth);
 
-            grPage.drawString(req.getPlateNumber(), 211, y);
-            y += 15;
+            y+=30;
 
 // comments info
 
             List<String> comments = req.getComments();
 
-            grPage.setFont(new Font("Monospaced", Font.PLAIN, 15));
+            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 15));
 
             for (String comment : comments) {
 
-                grPage.drawString(comment, 10, y);
-                y += 15;
+                drawCenteredText(
+                        grPage,
+                        comment,
+                        "Bahnschrift SemiLight",
+                        15,
+                        y+=10,
+                        pageWidth);
 
             }
 
