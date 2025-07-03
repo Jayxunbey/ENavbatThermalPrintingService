@@ -36,7 +36,7 @@ public class PrintService {
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 450; // long enough for a receipt
+            double height = 480; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
@@ -79,22 +79,14 @@ public class PrintService {
 
 // post malumot
 
-            drawCenteredText(
+            y = drawCenteredAndLineBreakerText(
                     grPage,
-                    "\"" + req.getPostName() + "\"",
+                    req.getPostName(),
                     "Cascadia Code",
                     15,
-                    y+=25,
-                    pageWidth);
-
-            drawCenteredText(
-                    grPage,
-                    "чегара пости",
-                    "Cascadia Code",
-                    15,
-                    y+=12,
-                    pageWidth);
-
+                    y+=20,
+                    pageWidth,
+                    15);
 
 // qr number info
 
@@ -115,13 +107,14 @@ public class PrintService {
 
 // plate number info
 
-            drawCenteredText(
+            y = drawCenteredAndLineBreakerText(
                     grPage,
                     req.getPlateNumber(),
                     "Arial Unicode MS",
                     15,
-                    y+=25,
-                    pageWidth);
+                    y+=20,
+                    pageWidth,
+                    15);
 
             y+=10;
 
