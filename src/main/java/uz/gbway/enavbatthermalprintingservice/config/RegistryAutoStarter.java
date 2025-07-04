@@ -1,6 +1,8 @@
 package uz.gbway.enavbatthermalprintingservice.config;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class RegistryAutoStarter {
 
@@ -10,23 +12,30 @@ public class RegistryAutoStarter {
 
     public static void enableAutoStart() {
         try {
-            String exePath = new File(RegistryAutoStarter.class.getProtectionDomain()
-                    .getCodeSource().getLocation().toURI()).getPath();
+            // Jar fayl yo'lini olish
+            String jarPath = System.getProperty("java.class.path");
+            Path path = Paths.get(jarPath);
 
-            // Jar bo‘lsa, uni exe deb hisoblaymiz (InnoSetup konvertatsiyasidan so‘ng)
-            if (exePath.endsWith(".jar")) {
-                exePath = exePath.replace(".jar", ".exe");
+            // Avto-start uchun registry yo'li
+            String key = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run";
+            String valueName = "ENavbatPrinter";
+            String command = "\"" + path.toAbsolutePath().toString() + "\"";
+
+            // Windows registryga qo'shish
+            Process process = Runtime.getRuntime().exec(
+                    "reg add " + key + " /v " + valueName + " /d " + command + " /f"
+            );
+
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("✅ Auto start muvaffaqiyatli qo‘shildi!");
+            } else {
+                System.err.println("❌ Auto start qo‘shilmadi. Exit code: " + exitCode);
             }
 
-            String regCommand = String.format("reg add \"%s\" /v \"%s\" /t REG_SZ /d \"%s\" /f",
-                    REG_PATH, KEY_NAME, exePath);
-
-            Process process = Runtime.getRuntime().exec(regCommand);
-            process.waitFor();
-
-            System.out.println("✅ Avto-start registryga qo‘shildi.");
         } catch (Exception e) {
-            System.err.println("❌ Avto-start qo‘shishda xatolik: " + e.getMessage());
+            System.err.println("Xatolik: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
