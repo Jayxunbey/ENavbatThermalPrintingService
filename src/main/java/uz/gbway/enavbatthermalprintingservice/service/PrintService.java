@@ -5,6 +5,7 @@ import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
 import uz.gbway.enavbatthermalprintingservice.util.TimeUtil;
 
+import javax.print.*;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
@@ -67,6 +68,12 @@ public class PrintService {
 
         book.append((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
+
+//            if (!checkIsPrinterOnline()) {
+//                throw new RuntimeException("Printer is not online");
+//            }
+
+            javax.print.PrintService printService = job.getPrintService();
 
             Graphics2D grPage = (Graphics2D) graphics;
 
@@ -156,6 +163,37 @@ public class PrintService {
         }, format);
 
         job.setPageable(book);
+    }
+
+    private boolean checkIsPrinterOnline() {
+
+        javax.print.PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
+        javax.print.PrintService selectedPrinter = null;
+
+        for (javax.print.PrintService service : services) {
+//            if (service.getName().equalsIgnoreCase(printerName)) {
+                selectedPrinter = service;
+//                break;
+//            }
+        }
+
+        if (selectedPrinter == null) {
+            throw new RuntimeException("Printer topilmadi");
+        }
+
+        // ESC v0 n (Printer status request)
+        byte[] statusCommand = new byte[]{0x10, 0x04, 0x01}; // ESC/POS printer uchun
+
+        DocPrintJob job = selectedPrinter.createPrintJob();
+        Doc doc = new SimpleDoc(statusCommand, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
+
+        try {
+            job.print(doc, null);
+            return true; // Print buyrug'i ketdi, demak printer javob bera oldi
+        } catch (PrintException e) {
+            System.out.println("Xatolik: " + e.getMessage());
+            return false;
+        }
     }
 
     public int drawCenteredAndLineBreakerText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth, float margin) {
