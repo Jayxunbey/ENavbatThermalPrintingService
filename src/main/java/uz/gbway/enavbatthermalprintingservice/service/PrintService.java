@@ -1,5 +1,6 @@
 package uz.gbway.enavbatthermalprintingservice.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
@@ -13,10 +14,14 @@ import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.awt.print.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.util.List;
 
+@Slf4j
 @Service
 public class PrintService {
     private final QrCodeUtil qrCodeUtil;
@@ -30,6 +35,11 @@ public class PrintService {
     public int print(PrintReqDto req) {
 
         try {
+
+            // Printer Onlinemi yoki Offline tekshiradi
+            if (!checkIsPrinterOnline()) {
+                throw new RuntimeException("Printer is not online");
+            }
 
             PrinterJob job = PrinterJob.getPrinterJob();
 
@@ -69,10 +79,6 @@ public class PrintService {
         book.append((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
 
-//            if (!checkIsPrinterOnline()) {
-//                throw new RuntimeException("Printer is not online");
-//            }
-
             javax.print.PrintService printService = job.getPrintService();
 
             Graphics2D grPage = (Graphics2D) graphics;
@@ -101,7 +107,7 @@ public class PrintService {
                     grPage,
                     req.getQrNumber(),
                     "Arial Unicode MS",
-                    22,
+                    20,
                     y+=50,
                     pageWidth);
 
@@ -167,33 +173,24 @@ public class PrintService {
 
     private boolean checkIsPrinterOnline() {
 
-        javax.print.PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
-        javax.print.PrintService selectedPrinter = null;
-
-        for (javax.print.PrintService service : services) {
-//            if (service.getName().equalsIgnoreCase(printerName)) {
-                selectedPrinter = service;
-//                break;
-//            }
-        }
-
-        if (selectedPrinter == null) {
-            throw new RuntimeException("Printer topilmadi");
-        }
-
-        // ESC v0 n (Printer status request)
-        byte[] statusCommand = new byte[]{0x10, 0x04, 0x01}; // ESC/POS printer uchun
-
-        DocPrintJob job = selectedPrinter.createPrintJob();
-        Doc doc = new SimpleDoc(statusCommand, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
-
         try {
-            job.print(doc, null);
-            return true; // Print buyrug'i ketdi, demak printer javob bera oldi
-        } catch (PrintException e) {
-            System.out.println("Xatolik: " + e.getMessage());
-            return false;
+            Process process = Runtime.getRuntime().exec("wmic printer where Default='TRUE' get WorkOffline");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().equalsIgnoreCase("WorkOffline") || line.trim().isEmpty()) continue;
+
+                String status = line.trim();
+                return status.equalsIgnoreCase("FALSE"); // FALSE => Online, TRUE => Offline
+            }
+
+            reader.close();
+            throw new IllegalStateException("Default printer topilmadi.");
+        } catch (Exception e) {
+            throw new RuntimeException("Printer holatini tekshirishda xatolik: " + e.getMessage());
         }
+
     }
 
     public int drawCenteredAndLineBreakerText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth, float margin) {
@@ -203,11 +200,6 @@ public class PrintService {
 
         return writeAsLineBreaking(g2d, text, y, pageWidth, font,margin);
 
-//        FontMetrics metrics = g2d.getFontMetrics(font);
-//        int textWidth = metrics.stringWidth(text);
-//
-//        int x = Math.max((pageWidth - textWidth) / 2, 0);
-//        g2d.drawString(text, x, y);
 
     }
 
