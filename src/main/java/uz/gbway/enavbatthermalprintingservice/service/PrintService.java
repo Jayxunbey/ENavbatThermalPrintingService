@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
+import uz.gbway.enavbatthermalprintingservice.util.ResourceLoaderUtil;
 import uz.gbway.enavbatthermalprintingservice.util.TimeUtil;
 
 import javax.print.*;
@@ -26,10 +27,12 @@ import java.util.List;
 public class PrintService {
     private final QrCodeUtil qrCodeUtil;
     private final TimeUtil timeUtil;
+    private final ResourceLoaderUtil resourceLoaderUtil;
 
-    public PrintService(QrCodeUtil qrCodeUtil, TimeUtil timeUtil) {
+    public PrintService(QrCodeUtil qrCodeUtil, TimeUtil timeUtil, ResourceLoaderUtil resourceLoaderUtil) {
         this.qrCodeUtil = qrCodeUtil;
         this.timeUtil = timeUtil;
+        this.resourceLoaderUtil = resourceLoaderUtil;
     }
 
     public int print(PrintReqDto req) {
@@ -47,7 +50,7 @@ public class PrintService {
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 480; // long enough for a receipt
+            double height = 550; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
@@ -73,6 +76,8 @@ public class PrintService {
         Book book = new Book();
 
         BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 180, 180);
+
+        BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
         final int pageWidth = 210;
 
@@ -161,6 +166,32 @@ public class PrintService {
                     y+=15,
                     pageWidth);
 
+
+// play market info
+
+            drawImage(grPage, playMarketDownload, 10, y+=25, pageWidth);
+
+            drawText(
+                    grPage,
+                    "GET IN ON",
+                    "Arial Unicode MS",
+                    9,
+                    52,
+                    y+=17,
+                    pageWidth);
+
+            drawText(
+                    grPage,
+                    "GOOGLE PLAY",
+                    "Arial Unicode MS",
+                    9,
+                    52,
+                    y+=15,
+                    pageWidth);
+
+
+            y += qrBufferedImage.getHeight();
+
             ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -170,6 +201,8 @@ public class PrintService {
 
         job.setPageable(book);
     }
+
+
 
     private boolean checkIsPrinterOnline() {
 
@@ -191,6 +224,18 @@ public class PrintService {
             throw new RuntimeException("Printer holatini tekshirishda xatolik: " + e.getMessage());
         }
 
+    }
+
+    private void drawText(Graphics2D g2d, String text, String fontName, int fontSize, int x, int y, int pageWidth) {
+        Font font = new Font(fontName, Font.CENTER_BASELINE, fontSize);
+        g2d.setFont(font);
+
+//        FontMetrics metrics = g2d.getFontMetrics(font);
+//        int textWidth = metrics.stringWidth(text);
+
+//        int x = Math.max((pageWidth - textWidth) / 2, 0);
+
+        g2d.drawString(text, x, y);
     }
 
     public int drawCenteredAndLineBreakerText(Graphics2D g2d, String text,String fontName, int fontSize, int y, int pageWidth, float margin) {
@@ -321,6 +366,7 @@ public class PrintService {
             }
 
 
+
             ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -333,6 +379,11 @@ public class PrintService {
         int pageWidth = (int) (paperWidthMM * dpi / 25.4); // 80mm in pixels
 
         return pageWidth;
+
+    }
+
+    private void drawImage(Graphics2D g2d, Image image, int x, int y, int pageWidth) {
+        g2d.drawImage(image, x, y, null); // Centered
 
     }
 

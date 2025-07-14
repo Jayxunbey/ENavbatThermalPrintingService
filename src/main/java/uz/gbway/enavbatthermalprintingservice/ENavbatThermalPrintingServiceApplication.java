@@ -10,7 +10,7 @@ public class ENavbatThermalPrintingServiceApplication {
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(ENavbatThermalPrintingServiceApplication.class, args);
-        TrayIconApp.showTrayIcon();
+//        TrayIconApp.showTrayIcon();
     }
 
 }
