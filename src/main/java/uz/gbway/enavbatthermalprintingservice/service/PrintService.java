@@ -79,6 +79,10 @@ public class PrintService {
 
         BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
+        // TODO davom qil
+        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 180, 180);
+
+
         final int pageWidth = 210;
 
         book.append((graphics, pageFormat, pageIndex) -> {
