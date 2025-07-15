@@ -80,7 +80,7 @@ public class PrintService {
         BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
         // TODO davom qil
-        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 180, 180);
+        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 80, 80);
 
 
         final int pageWidth = 210;
@@ -173,15 +173,28 @@ public class PrintService {
 
 // play market info
 
+
+
             drawImage(grPage, playMarketDownload, 10, y+=25, pageWidth);
+
+            drawImage(grPage, playMarketDownloadQR, 115, y-=20, pageWidth);
+
+            drawText(
+                    grPage,
+                    "E-NAVBAT",
+                    "Arial Unicode MS",
+                    9,
+                    55,
+                    y+=30,
+                    pageWidth);
 
             drawText(
                     grPage,
                     "GET IN ON",
                     "Arial Unicode MS",
                     9,
-                    52,
-                    y+=17,
+                    55,
+                    y+=15,
                     pageWidth);
 
             drawText(
@@ -189,9 +202,12 @@ public class PrintService {
                     "GOOGLE PLAY",
                     "Arial Unicode MS",
                     9,
-                    52,
+                    55,
                     y+=15,
                     pageWidth);
+
+
+
 
 
             y += qrBufferedImage.getHeight();
