@@ -39,10 +39,10 @@ public class PrintService {
 
         try {
 
-            // Printer Onlinemi yoki Offline tekshiradi
-            if (!checkIsPrinterOnline()) {
-                throw new RuntimeException("Printer is not online");
-            }
+//            // Printer Onlinemi yoki Offline tekshiradi
+//            if (!checkIsPrinterOnline()) {
+//                throw new RuntimeException("Printer is not online");
+//            }
 
             PrinterJob job = PrinterJob.getPrinterJob();
 
@@ -171,20 +171,25 @@ public class PrintService {
                     pageWidth);
 
 
+
+
 // play market info
 
+            int startOfPlayMarketBorderLine = y;
+
+            int x = 8;
 
 
-            drawImage(grPage, playMarketDownload, 10, y+=25, pageWidth);
+            drawImage(grPage, playMarketDownload, x+10, y+=25, pageWidth);
 
-            drawImage(grPage, playMarketDownloadQR, 115, y-=20, pageWidth);
+            drawImage(grPage, playMarketDownloadQR, x+115, y-=20, pageWidth);
 
             drawText(
                     grPage,
                     "E-NAVBAT",
                     "Arial Unicode MS",
                     9,
-                    55,
+                    x+55,
                     y+=30,
                     pageWidth);
 
@@ -193,7 +198,7 @@ public class PrintService {
                     "GET IN ON",
                     "Arial Unicode MS",
                     9,
-                    55,
+                    x+55,
                     y+=15,
                     pageWidth);
 
@@ -202,15 +207,21 @@ public class PrintService {
                     "GOOGLE PLAY",
                     "Arial Unicode MS",
                     9,
-                    55,
+                    x+55,
                     y+=15,
                     pageWidth);
 
 
+// line
+            drawLine(
+                    grPage,
+                    x+5,
+                    startOfPlayMarketBorderLine+10,
+                    x+180,
+                    y-startOfPlayMarketBorderLine+2
 
+            );
 
-
-            y += qrBufferedImage.getHeight();
 
             ////////////////////////////////////////////////////////////////////////////////
 
@@ -222,6 +233,9 @@ public class PrintService {
         job.setPageable(book);
     }
 
+    private void drawLine(Graphics2D grPage, int x, int y, int width, int height) {
+        grPage.drawRect(x, y, width, height);
+    }
 
 
     private boolean checkIsPrinterOnline() {
