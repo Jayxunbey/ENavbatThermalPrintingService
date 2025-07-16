@@ -39,10 +39,6 @@ public class PrintService {
 
         try {
 
-//            // Printer Onlinemi yoki Offline tekshiradi
-//            if (!checkIsPrinterOnline()) {
-//                throw new RuntimeException("Printer is not online");
-//            }
 
             PrinterJob job = PrinterJob.getPrinterJob();
 
@@ -64,11 +60,17 @@ public class PrintService {
 
             job.print(); // avtomatik chiqarish
 
+
+
+
         } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
             return 500;
+
         }
 
-
+        log.info("--> Chop etildi. <--");
         return 200;
     }
 
@@ -85,8 +87,12 @@ public class PrintService {
 
         final int pageWidth = 210;
 
+        log.info("--> Shablon tayorlanyabdi...");
+
         book.append((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
+
+
 
             javax.print.PrintService printService = job.getPrintService();
 
@@ -226,9 +232,12 @@ public class PrintService {
             ////////////////////////////////////////////////////////////////////////////////
 
 
+
             return Printable.PAGE_EXISTS;
 
         }, format);
+
+        log.info("--> Chop qilishga berilyabdi...");
 
         job.setPageable(book);
     }
