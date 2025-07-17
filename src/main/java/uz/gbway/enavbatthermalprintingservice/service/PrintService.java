@@ -85,7 +85,7 @@ public class PrintService {
         BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 120, 120);
 
 
-        final int pageWidth = 210;
+            final int pageWidth = 200;
 
         log.info("--> Shablon tayorlanyabdi...");
 
@@ -186,7 +186,7 @@ public class PrintService {
             int x = 8;
 
 
-            drawImage(grPage, playMarketDownload, x+5, y+=27, 40, pageWidth);
+            drawImage(grPage, playMarketDownload, x+2, y+=27, 40, pageWidth);
 
             drawImage(grPage, playMarketDownloadQR, x+115, y-=20, 80, pageWidth);
 
@@ -195,8 +195,8 @@ public class PrintService {
                     "E-NAVBAT",
                     "Arial Unicode MS",
                     9,
-                    x+50,
-                    y+=30,
+                    x+48,
+                    y+=28,
                     pageWidth);
 
             drawText(
@@ -204,7 +204,7 @@ public class PrintService {
                     "ILOVASINI",
                     "Arial Unicode MS",
                     9,
-                    x+50,
+                    x+48,
                     y+=15,
                     pageWidth);
 
@@ -213,7 +213,7 @@ public class PrintService {
                     "YUKLAB OLING!",
                     "Arial Unicode MS",
                     9,
-                    x+50,
+                    x+48,
                     y+=15,
                     pageWidth);
 
@@ -221,10 +221,10 @@ public class PrintService {
 // line
             drawLine(
                     grPage,
-                    x,
+                    x-2,
                     startOfPlayMarketBorderLine+5,
-                    x+185,
-                    y-startOfPlayMarketBorderLine+20
+                    x+187,
+                    y-startOfPlayMarketBorderLine+17
 
             );
 
