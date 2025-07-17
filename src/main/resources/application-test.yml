@@ -2,5 +2,5 @@ spring:
 
 
 server:
-  port: 9696
+  port: 8696
 

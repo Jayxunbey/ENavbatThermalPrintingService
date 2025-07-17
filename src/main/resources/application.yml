@@ -4,4 +4,4 @@ spring:
     name: ENavbatThermalPrintingService
 
   profiles:
-    active: local
+    active: prod
