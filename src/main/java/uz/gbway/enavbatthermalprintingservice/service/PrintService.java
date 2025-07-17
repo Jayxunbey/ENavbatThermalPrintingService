@@ -77,12 +77,12 @@ public class PrintService {
     private void qrCodeInfoENavbatVBook(PrinterJob job, PageFormat format, PrintReqDto req) {
         Book book = new Book();
 
-        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 180, 180);
+        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 150, 150);
 
         BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
         // TODO davom qil
-        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 80, 80);
+        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 120, 120);
 
 
         final int pageWidth = 210;
@@ -112,7 +112,7 @@ public class PrintService {
                     req.getPostName(),
                     "Cascadia Code",
                     15,
-                    y+=20,
+                    y+=5,
                     pageWidth,
                     15);
 
@@ -129,7 +129,7 @@ public class PrintService {
 
 // qr code info
 
-            drawCenteredImage(grPage, qrBufferedImage, y+=4, pageWidth);
+            drawCenteredImage(grPage, qrBufferedImage, y+=10, pageWidth);
 
             y += qrBufferedImage.getHeight();
 
@@ -181,39 +181,39 @@ public class PrintService {
 
 // play market info
 
-            int startOfPlayMarketBorderLine = y;
+            int startOfPlayMarketBorderLine = y+=2;
 
             int x = 8;
 
 
-            drawImage(grPage, playMarketDownload, x+10, y+=25, pageWidth);
+            drawImage(grPage, playMarketDownload, x+5, y+=27, 40, pageWidth);
 
-            drawImage(grPage, playMarketDownloadQR, x+115, y-=20, pageWidth);
+            drawImage(grPage, playMarketDownloadQR, x+115, y-=20, 80, pageWidth);
 
             drawText(
                     grPage,
                     "E-NAVBAT",
                     "Arial Unicode MS",
                     9,
-                    x+55,
+                    x+50,
                     y+=30,
                     pageWidth);
 
             drawText(
                     grPage,
-                    "GET IN ON",
+                    "ILOVASINI",
                     "Arial Unicode MS",
                     9,
-                    x+55,
+                    x+50,
                     y+=15,
                     pageWidth);
 
             drawText(
                     grPage,
-                    "GOOGLE PLAY",
+                    "YUKLAB OLING!",
                     "Arial Unicode MS",
                     9,
-                    x+55,
+                    x+50,
                     y+=15,
                     pageWidth);
 
@@ -221,10 +221,10 @@ public class PrintService {
 // line
             drawLine(
                     grPage,
-                    x+5,
-                    startOfPlayMarketBorderLine+10,
-                    x+180,
-                    y-startOfPlayMarketBorderLine+2
+                    x,
+                    startOfPlayMarketBorderLine+5,
+                    x+185,
+                    y-startOfPlayMarketBorderLine+20
 
             );
 
@@ -425,8 +425,9 @@ public class PrintService {
 
     }
 
-    private void drawImage(Graphics2D g2d, Image image, int x, int y, int pageWidth) {
-        g2d.drawImage(image, x, y, null); // Centered
+    private void drawImage(Graphics2D g2d, Image image, int x, int y, int width, int pageWidth) {
+
+        g2d.drawImage(image, x, y, width, width, null); // Centered
 
     }
 
