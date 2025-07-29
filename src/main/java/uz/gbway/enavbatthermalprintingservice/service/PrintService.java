@@ -77,7 +77,7 @@ public class PrintService {
     private void qrCodeInfoENavbatVBook(PrinterJob job, PageFormat format, PrintReqDto req) {
         Book book = new Book();
 
-        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber(), 150, 150);
+        BufferedImage qrBufferedImage = qrCodeUtil.generate(req.getQrNumber()+"#"+req.getPlateNumber(), 150, 150);
 
         BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
