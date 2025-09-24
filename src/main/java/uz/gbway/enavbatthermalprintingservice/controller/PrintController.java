@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintNewQueueReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.service.PrintService;
 
@@ -27,6 +28,17 @@ public class PrintController {
         log.info("--> Incoming request to print check <--");
 
         int statusCode = printService.print(req);
+
+        return ResponseEntity.status(HttpStatusCode.valueOf(statusCode)).build();
+
+    }
+
+    @PostMapping("/print-new-queue")
+    public ResponseEntity printQueue(@RequestBody PrintNewQueueReqDto req) {
+
+        log.info("--> Incoming request to print new queue info <--");
+
+        int statusCode = printService.printNewQueue(req);
 
         return ResponseEntity.status(HttpStatusCode.valueOf(statusCode)).build();
 
