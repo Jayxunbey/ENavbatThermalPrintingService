@@ -86,12 +86,12 @@ public class Shablon {
                     "Arial Unicode MS",
                     20,
                     y += 50,
-                    pageWidth);
+                    pageWidth+15);
 
 
 // qr code info
 
-            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth);
+            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth+15);
 
             y += queueNumberQrCode.getHeight();
 
@@ -101,12 +101,11 @@ public class Shablon {
                     grPage,
                     req.getPlateNumber(),
                     "Arial Unicode MS",
-                    15,
-                    y += 20,
+                    20,
+                    y += 5,
                     pageWidth,
                     15);
 
-            y += 10;
 
 // Queue info
 
@@ -114,31 +113,42 @@ public class Shablon {
                     grPage,
                     req.getQueue(),
                     "Arial Unicode MS",
-                    35,
-                    y += 20,
+                    60,
+                    y += 5,
                     pageWidth,
                     15);
 
-            y += 10;
+// queueComments info
 
-// comments info
+            y-=5;
 
-            java.util.List<String> comments = req.getQueueComments();
+            java.util.List<String> queueComments = req.getQueueComments();
 
-            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 15));
+//            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 20));
 
-            for (String comment : comments) {
+            StringBuilder fullQueueComment = new StringBuilder();
 
-                y = shablonUtil.drawCenteredAndLineBreakerText(
-                        grPage,
-                        comment,
-                        "Calibri Light",
-                        11,
-                        y += 6,
-                        pageWidth,
-                        15);
+            int isLastQueueCommentPost = queueComments.size() - 1;
+            int nowQueueCommentPost = 0;
+
+            for (String queueComment : queueComments) {
+
+                fullQueueComment.append(queueComment);
+
+                if (nowQueueCommentPost++ != isLastQueueCommentPost) {
+                    fullQueueComment.append("/");
+                }
 
             }
+
+            y = shablonUtil.drawCenteredAndLineBreakerText(
+                    grPage,
+                    fullQueueComment.toString(),
+                    "Calibri Light",
+                    15,
+                    y += 0,
+                    pageWidth,
+                    15);
 
 
 // Preliminary time info
@@ -146,18 +156,37 @@ public class Shablon {
             shablonUtil.drawCenteredText(
                     grPage,
                     timeUtil.epochToRegex("dd-MM-yyyy  HH:mm", req.getArrivalTime()),
-                    "Calibri Light",
-                    12,
-                    y += 15,
-                    pageWidth);
+                    "Arial Unicode MS",
+                    20,
+                    y += 40,
+                    pageWidth+16);
 
+// Preliminary time comment info
 
+            y+=5;
 
-// TODO Preliminary time comments
+            java.util.List<String> arrivalTimeComments = req.getArrivalTimeComments();
+
+            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 15));
+
+            for (String arrivalComment : arrivalTimeComments) {
+
+                y = shablonUtil.drawCenteredAndLineBreakerText(
+                        grPage,
+                        arrivalComment,
+                        "Calibri Light",
+                        11,
+                        y += 1,
+                        pageWidth,
+                        15);
+
+            }
+
+// Play market info
 
             int startOfPlayMarketBorderLine = y += 2;
 
-            int x = 8;
+            int x = 10;
 
 
             shablonUtil.drawImage(grPage, playMarketDownload, x + 2, y += 27, 40, pageWidth);
