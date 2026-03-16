@@ -1,6 +1,7 @@
 package uz.gbway.enavbatthermalprintingservice.shablon;
 
 import org.springframework.stereotype.Component;
+import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintInvoiceReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintNewQueueReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
@@ -86,12 +87,12 @@ public class Shablon {
                     "Arial Unicode MS",
                     20,
                     y += 50,
-                    pageWidth+15);
+                    pageWidth + 15);
 
 
 // qr code info
 
-            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth+15);
+            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth + 15);
 
             y += queueNumberQrCode.getHeight();
 
@@ -120,7 +121,7 @@ public class Shablon {
 
 // queueComments info
 
-            y-=5;
+            y -= 5;
 
             java.util.List<String> queueComments = req.getQueueComments();
 
@@ -159,11 +160,11 @@ public class Shablon {
                     "Arial Unicode MS",
                     20,
                     y += 40,
-                    pageWidth+16);
+                    pageWidth + 16);
 
 // Preliminary time comment info
 
-            y+=5;
+            y += 5;
 
             java.util.List<String> arrivalTimeComments = req.getArrivalTimeComments();
 
@@ -405,5 +406,212 @@ public class Shablon {
         job.setPageable(book);
 
     }
+
+    public void invoice(PrinterJob job, PageFormat format, PrintInvoiceReqDto req) {
+
+        Book book = new Book();
+
+        BufferedImage queueNumberQrCode = qrCodeUtil.generate(req.getQueueNumber(), 150, 150);
+
+        BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
+
+        // TODO davom qil
+        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 120, 120);
+
+
+        final int pageWidth = 200;
+
+
+        book.append((graphics, pageFormat, pageIndex) -> {
+            if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
+
+
+            Graphics2D grPage = (Graphics2D) graphics;
+
+            // 180 daraja aylantirish (teskari chiqayotgan bo‘lsa)
+            grPage.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+            grPage.rotate(Math.toRadians(0), pageFormat.getImageableWidth(), pageFormat.getImageableHeight());
+
+
+            int y = 0;
+
+// post malumot
+
+
+            y = shablonUtil.drawCenteredAndLineBreakerText(
+                    grPage,
+                    req.getPostName(),
+                    "Cascadia Code",
+                    15,
+                    y += 5,
+                    pageWidth,
+                    15);
+
+// qr number info
+
+            shablonUtil.drawCenteredText(
+                    grPage,
+                    req.getQueueNumber(),
+                    "Arial Unicode MS",
+                    20,
+                    y += 50,
+                    pageWidth + 15);
+
+
+// qr code info
+
+            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth + 15);
+
+            y += queueNumberQrCode.getHeight();
+
+// plate number info
+
+            y = shablonUtil.drawCenteredAndLineBreakerText(
+                    grPage,
+                    req.getPlateNumber(),
+                    "Arial Unicode MS",
+                    20,
+                    y += 5,
+                    pageWidth,
+                    15);
+
+
+// Queue info
+
+            y = shablonUtil.drawCenteredAndLineBreakerText(
+                    grPage,
+                    req.getQueue(),
+                    "Arial Unicode MS",
+                    60,
+                    y += 5,
+                    pageWidth,
+                    15);
+
+// queueComments info
+
+            y -= 5;
+
+            java.util.List<String> queueComments = req.getQueueComments();
+
+//            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 20));
+
+            StringBuilder fullQueueComment = new StringBuilder();
+
+            int isLastQueueCommentPost = queueComments.size() - 1;
+            int nowQueueCommentPost = 0;
+
+            for (String queueComment : queueComments) {
+
+                fullQueueComment.append(queueComment);
+
+                if (nowQueueCommentPost++ != isLastQueueCommentPost) {
+                    fullQueueComment.append("/");
+                }
+
+            }
+
+            y = shablonUtil.drawCenteredAndLineBreakerText(
+                    grPage,
+                    fullQueueComment.toString(),
+                    "Calibri Light",
+                    15,
+                    y += 0,
+                    pageWidth,
+                    15);
+
+
+// Preliminary time info
+
+            shablonUtil.drawCenteredText(
+                    grPage,
+                    timeUtil.epochToRegex("dd-MM-yyyy  HH:mm", req.getArrivalTime()),
+                    "Arial Unicode MS",
+                    20,
+                    y += 40,
+                    pageWidth + 16);
+
+// Preliminary time comment info
+
+            y += 5;
+
+            java.util.List<String> arrivalTimeComments = req.getArrivalTimeComments();
+
+            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 15));
+
+            for (String arrivalComment : arrivalTimeComments) {
+
+                y = shablonUtil.drawCenteredAndLineBreakerText(
+                        grPage,
+                        arrivalComment,
+                        "Calibri Light",
+                        11,
+                        y += 1,
+                        pageWidth,
+                        15);
+
+            }
+
+// Play market info
+
+            int startOfPlayMarketBorderLine = y += 2;
+
+            int x = 10;
+
+
+            shablonUtil.drawImage(grPage, playMarketDownload, x + 2, y += 27, 40, pageWidth);
+
+            shablonUtil.drawImage(grPage, playMarketDownloadQR, x + 115, y -= 20, 80, pageWidth);
+
+            shablonUtil.drawText(
+                    grPage,
+                    "E-NAVBAT",
+                    "Arial Unicode MS",
+                    9,
+                    x + 48,
+                    y += 28,
+                    pageWidth);
+
+            shablonUtil.drawText(
+                    grPage,
+                    "ILOVASINI",
+                    "Arial Unicode MS",
+                    9,
+                    x + 48,
+                    y += 15,
+                    pageWidth);
+
+            shablonUtil.drawText(
+                    grPage,
+                    "YUKLAB OLING!",
+                    "Arial Unicode MS",
+                    9,
+                    x + 48,
+                    y += 15,
+                    pageWidth);
+
+
+// line
+            shablonUtil.drawLine(
+                    grPage,
+                    x - 2,
+                    startOfPlayMarketBorderLine + 5,
+                    x + 187,
+                    y - startOfPlayMarketBorderLine + 17
+
+            );
+
+
+            ////////////////////////////////////////////////////////////////////////////////
+
+
+            return Printable.PAGE_EXISTS;
+
+        }, format);
+
+        job.setPageable(book);
+
+    }
+
+
 }
 
