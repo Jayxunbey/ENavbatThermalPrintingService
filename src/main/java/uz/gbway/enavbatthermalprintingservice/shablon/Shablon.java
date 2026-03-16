@@ -10,20 +10,12 @@ import uz.gbway.enavbatthermalprintingservice.util.ShablonUtil;
 import uz.gbway.enavbatthermalprintingservice.util.TimeUtil;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.font.LineBreakMeasurer;
-import java.awt.font.TextAttribute;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterJob;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.text.AttributedCharacterIterator;
-import java.text.AttributedString;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class Shablon {
@@ -411,7 +403,7 @@ public class Shablon {
 
         Book book = new Book();
 
-        BufferedImage queueNumberQrCode = qrCodeUtil.generate(req.getQueueNumber(), 150, 150);
+//        BufferedImage queueNumberQrCode = qrCodeUtil.generate(req.getQueueNumber(), 150, 150);
 
         BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
@@ -440,165 +432,185 @@ public class Shablon {
 
             y = shablonUtil.drawCenteredAndLineBreakerText(
                     grPage,
-                    req.getPostName(),
+                    "АВТОТУРАРГОҲ УЧУН ТЎЛОВ ВАРАҚАСИ", // TODO caption
                     "Cascadia Code",
-                    15,
-                    y += 5,
+                    16,
+                    y+=5,
                     pageWidth,
                     15);
+
+
+// Row Values each
+
+            for (PrintInvoiceReqDto.RowValues rowValue : req.getRowValues()) {
+
+                y = shablonUtil.drawSpaceAroundTextKeyValue(
+                        grPage,
+                        rowValue.getKeyText(),
+                        rowValue.getValueText(),
+                        "Arial Unicode MS",
+                        8,
+                        y+=5,
+                        pageWidth,
+                        15);
+            }
+
+
+
+
 
 // qr number info
 
-            shablonUtil.drawCenteredText(
-                    grPage,
-                    req.getQueueNumber(),
-                    "Arial Unicode MS",
-                    20,
-                    y += 50,
-                    pageWidth + 15);
+//            shablonUtil.drawCenteredText(
+//                    grPage,
+//                    req.getQueueNumber(),
+//                    "Arial Unicode MS",
+//                    20,
+//                    y += 50,
+//                    pageWidth + 15);
 
 
 // qr code info
-
-            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth + 15);
-
-            y += queueNumberQrCode.getHeight();
+//
+//            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth + 15);
+//
+//            y += queueNumberQrCode.getHeight();
 
 // plate number info
 
-            y = shablonUtil.drawCenteredAndLineBreakerText(
-                    grPage,
-                    req.getPlateNumber(),
-                    "Arial Unicode MS",
-                    20,
-                    y += 5,
-                    pageWidth,
-                    15);
+//            y = shablonUtil.drawCenteredAndLineBreakerText(
+//                    grPage,
+//                    req.getPlateNumber(),
+//                    "Arial Unicode MS",
+//                    20,
+//                    y += 5,
+//                    pageWidth,
+//                    15);
 
 
 // Queue info
 
-            y = shablonUtil.drawCenteredAndLineBreakerText(
-                    grPage,
-                    req.getQueue(),
-                    "Arial Unicode MS",
-                    60,
-                    y += 5,
-                    pageWidth,
-                    15);
+//            y = shablonUtil.drawCenteredAndLineBreakerText(
+//                    grPage,
+//                    req.getQueue(),
+//                    "Arial Unicode MS",
+//                    60,
+//                    y += 5,
+//                    pageWidth,
+//                    15);
 
 // queueComments info
-
-            y -= 5;
-
-            java.util.List<String> queueComments = req.getQueueComments();
-
+//
+//            y.addAndGet(-5);
+//
+//            java.util.List<String> queueComments = req.getQueueComments();
+//
 //            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 20));
+//
+//            StringBuilder fullQueueComment = new StringBuilder();
+//
+//            int isLastQueueCommentPost = queueComments.size() - 1;
+//            int nowQueueCommentPost = 0;
+//
+//            for (String queueComment : queueComments) {
+//
+//                fullQueueComment.append(queueComment);
+//
+//                if (nowQueueCommentPost++ != isLastQueueCommentPost) {
+//                    fullQueueComment.append("/");
+//                }
+//
+//            }
+//
+//            y.set(shablonUtil.drawCenteredAndLineBreakerText(
+//                    grPage,
+//                    fullQueueComment.toString(),
+//                    "Calibri Light",
+//                    15,
+//                    y.addAndGet(0),
+//                    pageWidth,
+//                    15));
+//
+//
+//// Preliminary time info
+//
+//            shablonUtil.drawCenteredText(
+//                    grPage,
+//                    timeUtil.epochToRegex("dd-MM-yyyy  HH:mm", req.getArrivalTime()),
+//                    "Arial Unicode MS",
+//                    20,
+//                    y.addAndGet(40),
+//                    pageWidth + 16);
+//
+//// Preliminary time comment info
+//
+//            y.addAndGet(5);
+//
+//            java.util.List<String> arrivalTimeComments = req.getArrivalTimeComments();
+//
+//            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 15));
+//
+//            for (String arrivalComment : arrivalTimeComments) {
+//
+//                y.set(shablonUtil.drawCenteredAndLineBreakerText(
+//                        grPage,
+//                        arrivalComment,
+//                        "Calibri Light",
+//                        11,
+//                        y.addAndGet(1),
+//                        pageWidth,
+//                        15));
+//
+//            }
+//
+//// Play market info
+//
+//            int startOfPlayMarketBorderLine = y.addAndGet(2);
+//
+//            int x = 10;
+//
+//
+//            shablonUtil.drawImage(grPage, playMarketDownload, x + 2, y.addAndGet(27), 40, pageWidth);
+//
+//            shablonUtil.drawImage(grPage, playMarketDownloadQR, x + 115, y.addAndGet(-20), 80, pageWidth);
 
-            StringBuilder fullQueueComment = new StringBuilder();
+//            shablonUtil.drawText(
+//                    grPage,
+//                    "E-NAVBAT",
+//                    "Arial Unicode MS",
+//                    9,
+//                    x + 48,
+//                    y.addAndGet(28),
+//                    pageWidth);
 
-            int isLastQueueCommentPost = queueComments.size() - 1;
-            int nowQueueCommentPost = 0;
+//            shablonUtil.drawText(
+//                    grPage,
+//                    "ILOVASINI",
+//                    "Arial Unicode MS",
+//                    9,
+//                    x + 48,
+//                    y.addAndGet(15),
+//                    pageWidth);
 
-            for (String queueComment : queueComments) {
-
-                fullQueueComment.append(queueComment);
-
-                if (nowQueueCommentPost++ != isLastQueueCommentPost) {
-                    fullQueueComment.append("/");
-                }
-
-            }
-
-            y = shablonUtil.drawCenteredAndLineBreakerText(
-                    grPage,
-                    fullQueueComment.toString(),
-                    "Calibri Light",
-                    15,
-                    y += 0,
-                    pageWidth,
-                    15);
-
-
-// Preliminary time info
-
-            shablonUtil.drawCenteredText(
-                    grPage,
-                    timeUtil.epochToRegex("dd-MM-yyyy  HH:mm", req.getArrivalTime()),
-                    "Arial Unicode MS",
-                    20,
-                    y += 40,
-                    pageWidth + 16);
-
-// Preliminary time comment info
-
-            y += 5;
-
-            java.util.List<String> arrivalTimeComments = req.getArrivalTimeComments();
-
-            grPage.setFont(new Font("Monospaced", Font.CENTER_BASELINE, 15));
-
-            for (String arrivalComment : arrivalTimeComments) {
-
-                y = shablonUtil.drawCenteredAndLineBreakerText(
-                        grPage,
-                        arrivalComment,
-                        "Calibri Light",
-                        11,
-                        y += 1,
-                        pageWidth,
-                        15);
-
-            }
-
-// Play market info
-
-            int startOfPlayMarketBorderLine = y += 2;
-
-            int x = 10;
-
-
-            shablonUtil.drawImage(grPage, playMarketDownload, x + 2, y += 27, 40, pageWidth);
-
-            shablonUtil.drawImage(grPage, playMarketDownloadQR, x + 115, y -= 20, 80, pageWidth);
-
-            shablonUtil.drawText(
-                    grPage,
-                    "E-NAVBAT",
-                    "Arial Unicode MS",
-                    9,
-                    x + 48,
-                    y += 28,
-                    pageWidth);
-
-            shablonUtil.drawText(
-                    grPage,
-                    "ILOVASINI",
-                    "Arial Unicode MS",
-                    9,
-                    x + 48,
-                    y += 15,
-                    pageWidth);
-
-            shablonUtil.drawText(
-                    grPage,
-                    "YUKLAB OLING!",
-                    "Arial Unicode MS",
-                    9,
-                    x + 48,
-                    y += 15,
-                    pageWidth);
+//            shablonUtil.drawText(
+//                    grPage,
+//                    "YUKLAB OLING!",
+//                    "Arial Unicode MS",
+//                    9,
+//                    x + 48,
+//                    y.addAndGet(15),
+//                    pageWidth);
 
 
 // line
-            shablonUtil.drawLine(
-                    grPage,
-                    x - 2,
-                    startOfPlayMarketBorderLine + 5,
-                    x + 187,
-                    y - startOfPlayMarketBorderLine + 17
-
-            );
+//            shablonUtil.drawLine(
+//                    grPage,
+//                    x - 2,
+//                    startOfPlayMarketBorderLine + 5,
+//                    x + 187,
+//                    y.get() - startOfPlayMarketBorderLine + 17
+//
+//            );
 
 
             ////////////////////////////////////////////////////////////////////////////////
@@ -614,4 +626,5 @@ public class Shablon {
 
 
 }
+
 
