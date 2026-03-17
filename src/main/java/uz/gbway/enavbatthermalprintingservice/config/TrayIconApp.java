@@ -44,7 +44,7 @@ public class TrayIconApp {
         popup.add(restartItem);
         popup.add(exitItem);
 
-        TrayIcon trayIcon = new TrayIcon(image, "GB Way Printing Service", popup);
+        TrayIcon trayIcon = new TrayIcon(image, "E-Navbat Printer Service", popup);
         trayIcon.setImageAutoSize(true);
         SystemTray.getSystemTray().add(trayIcon);
 
