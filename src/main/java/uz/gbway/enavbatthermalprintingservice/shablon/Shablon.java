@@ -455,7 +455,7 @@ public class Shablon {
                         grPage,
                         rowValue.getKeyText()+":",
                         rowValue.getValueText(),
-                        "Calibri Light",
+                        "Sitka Heading Semibold",
                         7,
                         y+=5,
                         pageWidth,
