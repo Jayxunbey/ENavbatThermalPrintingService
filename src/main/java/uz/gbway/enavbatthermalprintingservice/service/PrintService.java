@@ -2,6 +2,7 @@ package uz.gbway.enavbatthermalprintingservice.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintInvoiceReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintNewQueueReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
@@ -74,7 +75,7 @@ public class PrintService {
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 550; // long enough for a receipt
+            double height = 580; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins
@@ -100,4 +101,36 @@ public class PrintService {
 
     }
 
+    public int printInvoice(PrintInvoiceReqDto req) {
+        try {
+
+            PrinterJob job = PrinterJob.getPrinterJob();
+
+            Paper paper = new Paper();
+
+            double width = 210; // 80mm in points
+            double height = 500; // long enough for a receipt
+
+            paper.setSize(width, height);
+            paper.setImageableArea(0, 0, width, height); // no margins
+
+            PageFormat format = job.defaultPage();
+            format.setPaper(paper);
+            format.setOrientation(PageFormat.PORTRAIT);
+
+            shablon.invoice(job, format, req);
+
+            job.print(); // avtomatik chiqarish
+
+
+        } catch (Exception e) {
+
+            log.error(e.getMessage(), e);
+            return 500;
+
+        }
+
+        log.info("--> Chop etildi. <--");
+        return 200;
+    }
 }

@@ -1,6 +1,7 @@
 package uz.gbway.enavbatthermalprintingservice.shablon;
 
 import org.springframework.stereotype.Component;
+import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintInvoiceReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintNewQueueReqDto;
 import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 import uz.gbway.enavbatthermalprintingservice.util.QrCodeUtil;
@@ -9,20 +10,11 @@ import uz.gbway.enavbatthermalprintingservice.util.ShablonUtil;
 import uz.gbway.enavbatthermalprintingservice.util.TimeUtil;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.font.LineBreakMeasurer;
-import java.awt.font.TextAttribute;
-import java.awt.font.TextLayout;
 import java.awt.image.BufferedImage;
 import java.awt.print.Book;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterJob;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.text.AttributedCharacterIterator;
-import java.text.AttributedString;
-import java.util.List;
 
 @Component
 public class Shablon {
@@ -86,12 +78,12 @@ public class Shablon {
                     "Arial Unicode MS",
                     20,
                     y += 50,
-                    pageWidth+15);
+                    pageWidth + 15);
 
 
 // qr code info
 
-            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth+15);
+            shablonUtil.drawCenteredImage(grPage, queueNumberQrCode, y += 10, pageWidth + 15);
 
             y += queueNumberQrCode.getHeight();
 
@@ -120,7 +112,7 @@ public class Shablon {
 
 // queueComments info
 
-            y-=5;
+            y -= 5;
 
             java.util.List<String> queueComments = req.getQueueComments();
 
@@ -159,11 +151,11 @@ public class Shablon {
                     "Arial Unicode MS",
                     20,
                     y += 40,
-                    pageWidth+16);
+                    pageWidth + 16);
 
 // Preliminary time comment info
 
-            y+=5;
+            y += 5;
 
             java.util.List<String> arrivalTimeComments = req.getArrivalTimeComments();
 
@@ -405,5 +397,110 @@ public class Shablon {
         job.setPageable(book);
 
     }
+
+    public void invoice(PrinterJob job, PageFormat format, PrintInvoiceReqDto req) {
+
+        Book book = new Book();
+
+        // TODO davom qil
+        BufferedImage qrPdfCheckOnlineLink = qrCodeUtil.generate(req.getPdfCheckLink(), 125, 125);
+
+        final int pageWidth = 210;
+
+        book.append((graphics, pageFormat, pageIndex) -> {
+            if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
+
+
+            Graphics2D grPage = (Graphics2D) graphics;
+
+            // 180 daraja aylantirish (teskari chiqayotgan bo‘lsa)
+            grPage.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+            grPage.rotate(Math.toRadians(0), pageFormat.getImageableWidth(), pageFormat.getImageableHeight());
+
+
+            int y = 0;
+
+// Caption
+
+            y = shablonUtil.drawCenteredAndLineBreakerText(
+                    grPage,
+                    "АВТОТУРАРГОҲ УЧУН ТЎЛОВ ВАРАҚАСИ", // TODO caption
+                    "Cascadia Code",
+                    16,
+                    y+=20,
+                    pageWidth,
+                    15);
+
+
+
+// Invoice
+            y = shablonUtil.drawSpaceBetweenTextKeyValue(
+                    grPage,
+                    "Инвойс рақами:",
+                    req.getInvoice(),
+                    "Arial Unicode MS",
+                    11,
+                    y+=20,
+                    pageWidth,
+                    16);
+
+// Splitter
+            y+=20;
+
+// Row Values each
+
+            for (PrintInvoiceReqDto.RowValues rowValue : req.getRowValues()) {
+
+                y = shablonUtil.drawSpaceBetweenTextKeyValue(
+                        grPage,
+                        rowValue.getKeyText()+":",
+                        rowValue.getValueText(),
+                        "Calibri Light",
+                        7,
+                        y+=5,
+                        pageWidth,
+                        15);
+            }
+
+// Qr Pdf Link
+
+            shablonUtil.drawCenteredImage(grPage, qrPdfCheckOnlineLink, y += 30, pageWidth + 15);
+
+// qr number info
+
+//            shablonUtil.drawText(
+//                    grPage,
+//                    "YUKLAB OLING!",
+//                    "Arial Unicode MS",
+//                    9,
+//                    x + 48,
+//                    y.addAndGet(15),
+//                    pageWidth);
+
+
+// line
+//            shablonUtil.drawLine(
+//                    grPage,
+//                    x - 2,
+//                    startOfPlayMarketBorderLine + 5,
+//                    x + 187,
+//                    y.get() - startOfPlayMarketBorderLine + 17
+//
+//            );
+
+
+            ////////////////////////////////////////////////////////////////////////////////
+
+
+            return Printable.PAGE_EXISTS;
+
+        }, format);
+
+        job.setPageable(book);
+
+    }
+
+
 }
+
 

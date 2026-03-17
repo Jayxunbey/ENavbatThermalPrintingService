@@ -1,24 +1,14 @@
 package uz.gbway.enavbatthermalprintingservice.util;
 
 import org.springframework.stereotype.Component;
-import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintNewQueueReqDto;
-import uz.gbway.enavbatthermalprintingservice.dto.req.print.PrintReqDto;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
-import java.awt.image.BufferedImage;
-import java.awt.print.Book;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-import java.awt.print.PrinterJob;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
-import java.util.List;
 
 @Component
 public class ShablonUtil {
@@ -115,5 +105,62 @@ public class ShablonUtil {
     }
 
 
+    public int drawSpaceBetweenTextKeyValue(Graphics2D g2d, String textKey, String textValue, String fontName, int fontSize, int y, int pageWidth, float margin) {
 
+        Font font = new Font(fontName, Font.PLAIN, fontSize);
+        g2d.setFont(font);
+
+        return writeSpaceBetweenTextKeyValue(g2d, textKey, textValue, y, pageWidth, font, margin);
+
+//        return writeSpaceAroundTextKeyValue(g2d, textKey, textValue, y, pageWidth, font,margin);
+    }
+
+    private int writeSpaceBetweenTextKeyValue(
+            Graphics2D g2d,
+            String textKey,
+            String textValue,
+            int y,
+            int pageWidth,
+            Font font,
+            float margin) {
+
+        g2d.setFont(font);
+        FontMetrics fm = g2d.getFontMetrics();
+
+        int ascent = fm.getAscent();
+        y += ascent;
+
+        int keyX = (int) margin;
+
+        int valueWidth = fm.stringWidth(textValue);
+        int valueX = (int) (pageWidth - valueWidth - margin);
+
+        g2d.drawString(textKey, keyX, y);
+        g2d.drawString(textValue, valueX, y);
+
+        return y + fm.getDescent();
+    }
+
+    private int writeSpaceAroundTextKeyValue(Graphics2D g2d, String textKey, String textValue, int y, int pageWidth, Font font, float margin) {
+
+        FontRenderContext frc = g2d.getFontRenderContext();
+        AttributedString attrStrKey = new AttributedString(textKey);
+        attrStrKey.addAttribute(TextAttribute.FONT, font);
+
+        AttributedCharacterIterator paragraph = attrStrKey.getIterator();
+        LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(paragraph, frc);
+
+        float wrappingWidth = (float) (pageWidth - margin*2); // 15px margin each side
+
+        while (lineMeasurer.getPosition() < paragraph.getEndIndex()) {
+            TextLayout layout = lineMeasurer.nextLayout(wrappingWidth);
+            y += layout.getAscent();
+            float drawPosX = (float)(pageWidth - layout.getAdvance()) / 2+margin/2;
+            layout.draw(g2d, drawPosX, y);
+            y += layout.getDescent() + layout.getLeading();
+        }
+
+        return y;
+
+    }
 }
