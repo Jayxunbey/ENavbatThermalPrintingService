@@ -402,16 +402,10 @@ public class Shablon {
 
         Book book = new Book();
 
-//        BufferedImage queueNumberQrCode = qrCodeUtil.generate(req.getQueueNumber(), 150, 150);
-
-        BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
-
         // TODO davom qil
         BufferedImage qrPdfCheckOnlineLink = qrCodeUtil.generate(req.getPdfCheckLink(), 125, 125);
 
-
         final int pageWidth = 210;
-
 
         book.append((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
