@@ -15,7 +15,6 @@ import java.awt.print.Book;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterJob;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class Shablon {
@@ -408,10 +407,10 @@ public class Shablon {
         BufferedImage playMarketDownload = resourceLoaderUtil.loadPlayMarketDownlaodImage();
 
         // TODO davom qil
-        BufferedImage playMarketDownloadQR = qrCodeUtil.generate("https://play.google.com/store/apps/details?id=com.eskishahar.app.enavbat&hl=ru", 120, 120);
+        BufferedImage qrPdfCheckOnlineLink = qrCodeUtil.generate(req.getPdfCheckLink(), 125, 125);
 
 
-        final int pageWidth = 200;
+        final int pageWidth = 210;
 
 
         book.append((graphics, pageFormat, pageIndex) -> {
@@ -427,37 +426,51 @@ public class Shablon {
 
             int y = 0;
 
-// post malumot
-
+// Caption
 
             y = shablonUtil.drawCenteredAndLineBreakerText(
                     grPage,
                     "АВТОТУРАРГОҲ УЧУН ТЎЛОВ ВАРАҚАСИ", // TODO caption
                     "Cascadia Code",
                     16,
-                    y+=5,
+                    y+=20,
                     pageWidth,
                     15);
 
+
+
+// Invoice
+            y = shablonUtil.drawSpaceBetweenTextKeyValue(
+                    grPage,
+                    "Инвойс рақами:",
+                    req.getInvoice(),
+                    "Arial Unicode MS",
+                    11,
+                    y+=20,
+                    pageWidth,
+                    16);
+
+// Splitter
+            y+=20;
 
 // Row Values each
 
             for (PrintInvoiceReqDto.RowValues rowValue : req.getRowValues()) {
 
-                y = shablonUtil.drawSpaceAroundTextKeyValue(
+                y = shablonUtil.drawSpaceBetweenTextKeyValue(
                         grPage,
-                        rowValue.getKeyText(),
+                        rowValue.getKeyText()+":",
                         rowValue.getValueText(),
-                        "Arial Unicode MS",
-                        8,
+                        "Calibri Light",
+                        7,
                         y+=5,
                         pageWidth,
                         15);
             }
 
+// Qr Pdf Link
 
-
-
+            shablonUtil.drawCenteredImage(grPage, qrPdfCheckOnlineLink, y += 30, pageWidth + 15);
 
 // qr number info
 
@@ -572,7 +585,7 @@ public class Shablon {
 //
 //            shablonUtil.drawImage(grPage, playMarketDownload, x + 2, y.addAndGet(27), 40, pageWidth);
 //
-//            shablonUtil.drawImage(grPage, playMarketDownloadQR, x + 115, y.addAndGet(-20), 80, pageWidth);
+//            shablonUtil.drawImage(grPage, qrPdfCheckOnlineLink, x + 115, y-=20, 80, pageWidth);
 
 //            shablonUtil.drawText(
 //                    grPage,

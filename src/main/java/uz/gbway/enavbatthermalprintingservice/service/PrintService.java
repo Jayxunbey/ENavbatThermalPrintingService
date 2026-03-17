@@ -109,7 +109,7 @@ public class PrintService {
             Paper paper = new Paper();
 
             double width = 210; // 80mm in points
-            double height = 580; // long enough for a receipt
+            double height = 500; // long enough for a receipt
 
             paper.setSize(width, height);
             paper.setImageableArea(0, 0, width, height); // no margins

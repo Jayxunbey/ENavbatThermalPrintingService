@@ -105,7 +105,7 @@ public class ShablonUtil {
     }
 
 
-    public int drawSpaceAroundTextKeyValue(Graphics2D g2d, String textKey, String textValue, String fontName, int fontSize, int y, int pageWidth, float margin) {
+    public int drawSpaceBetweenTextKeyValue(Graphics2D g2d, String textKey, String textValue, String fontName, int fontSize, int y, int pageWidth, float margin) {
 
         Font font = new Font(fontName, Font.PLAIN, fontSize);
         g2d.setFont(font);

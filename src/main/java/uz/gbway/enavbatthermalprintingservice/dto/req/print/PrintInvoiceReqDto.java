@@ -13,6 +13,8 @@ import java.util.Map;
 @Setter
 public class PrintInvoiceReqDto {
     private String mainCaption;
+    private String invoice;
+    private String pdfCheckLink;
     private List<RowValues> rowValues;
 
     private String arrivalTime;
