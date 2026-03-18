@@ -405,7 +405,7 @@ public class Shablon {
         // TODO davom qil
         BufferedImage qrPdfCheckOnlineLink = qrCodeUtil.generate(req.getPdfCheckLink(), 125, 125);
 
-        final int pageWidth = 210;
+        final int pageWidth = 205;
 
         book.append((graphics, pageFormat, pageIndex) -> {
             if (pageIndex > 0) return Printable.NO_SUCH_PAGE;
